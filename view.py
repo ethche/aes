@@ -25,9 +25,9 @@ def filter_data_line(df, reward_dist, K, T_limit):
 # Things within our framework, things outside our framework...
 # E.g. Dashed lines...
 color_dict = {'Uniform': {"color":'#377eb8', 'ls':"--", 'hatch': '/'},
-            'Batch Successive Elimination': {"color": '#984ea3', 'ls':"--", 'hatch': '/'},
-            'Batch Oracle Top-Two TS': {"color": 'chocolate', 'ls':"--", 'hatch': '/'},
-            'Batch Oracle TS': {"color": '#f781bf', 'ls': "--", 'hatch': '/'},
+            'Successive Elimination': {"color": '#984ea3', 'ls':"--", 'hatch': '/'},
+            'Oracle Top-Two TS': {"color": 'chocolate', 'ls':"--", 'hatch': '/'},
+            'Oracle TS': {"color": '#f781bf', 'ls': "--", 'hatch': '/'},
             'Gaussian Limit Top-Two TS': {"color": 'blue', 'ls': "-", 'hatch': ''},
             'Gaussian Limit TS': {"color": '#87CEEB', 'ls': "-", 'hatch': ''},
             'Myopic': {"color": '#e41a1c', 'ls': "-", 'hatch': ''},
