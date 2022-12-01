@@ -338,9 +338,9 @@ with line_plt_toggle:
 
     policies_selected = st.multiselect("Policies", options = [key for key in  color_dict.keys()], key = 'policies_select', 
                                         default = ['Uniform', 
-                                                   'Batch Successive Elimination', 
+                                                   'Successive Elimination', 
                                                    'Gaussian Limit TS', 
-                                                   'Batch Oracle TS',
+                                                   'Oracle TS',
                                                    'Myopic',
                                                    'Policy Gradient',
                                                    'RHO (proposed)'])
@@ -384,9 +384,9 @@ with row3_2:
                                     key = 'bar_metric_select')
     bar_policies_selected = st.multiselect("Policies", options = [key for key in  color_dict.keys()], key = 'bar_policies_select', 
                                         default = ['Uniform', 
-                                                   'Batch Successive Elimination', 
+                                                   'Successive Elimination', 
                                                    'Gaussian Limit TS', 
-                                                   'Batch Oracle TS',
+                                                   'Oracle TS',
                                                    'Myopic',
                                                    'Policy Gradient',
                                                    'RHO (proposed)'])
@@ -426,9 +426,9 @@ with row4_2:
     prior_s2_selected = st.selectbox("Measurement variance", options = (1, 0.2, 5), key = 'prior_s2_select')
     prior_policies_selected = st.multiselect("Policies", options = [key for key in  color_dict.keys()], key = 'prior_policies_select', 
                                         default = ['Uniform', 
-                                                   'Batch Successive Elimination', 
+                                                   'Successive Elimination', 
                                                    'Gaussian Limit TS', 
-                                                   'Batch Oracle TS',
+                                                   'Oracle TS',
                                                    'Myopic',
                                                    'Policy Gradient',
                                                    'RHO (proposed)'])
