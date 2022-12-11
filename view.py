@@ -15,7 +15,7 @@ with open("regret_df.json") as f:
 regret_df = pd.DataFrame(regret)
 
 def filter_data_line(df, reward_dist, K, T_limit):
-    K_cond = df['K'] == K
+    K_cond = df['k'] == K
     dist_cond = df['reward_dist'] == reward_dist
     T_cond = df['T'] <= T_limit
 
@@ -23,10 +23,11 @@ def filter_data_line(df, reward_dist, K, T_limit):
 
 #'Epsilon Greedy':'#377eb8',
 # Things within our framework, things outside our framework...
-# E.g. Dashed lines...
+# E.g. Dashed lines...'#984ea3'
 color_dict = {'Uniform': {"color":'#377eb8', 'ls':"--", 'hatch': '/'},
-            'Successive Elimination': {"color": '#984ea3', 'ls':"--", 'hatch': '/'},
-            'Oracle Top-Two TS': {"color": 'chocolate', 'ls':"--", 'hatch': '/'},
+            'Epsilon Greedy': {"color":'darkgreen', 'ls':"--", 'hatch': '/'},
+            'Successive Elimination': {"color": 'mediumvioletred', 'ls':"--", 'hatch': '/'},
+            'Oracle Top-Two TS': {"color": 'blueviolet', 'ls':"--", 'hatch': '/'},
             'Oracle TS': {"color": '#f781bf', 'ls': "--", 'hatch': '/'},
             'Gaussian Limit Top-Two TS': {"color": 'blue', 'ls': "-", 'hatch': ''},
             'Gaussian Limit TS': {"color": '#87CEEB', 'ls': "-", 'hatch': ''},
@@ -38,20 +39,21 @@ color_dict = {'Uniform': {"color":'#377eb8', 'ls':"--", 'hatch': '/'},
 #ordered_pols = ['Uniform', ]
 
 
-def plot_line(df, metric, reward_dist, K, T_limit, policies, s2, prior_type, color_dict = color_dict):
+def plot_line(df, metric, reward_dist, batch, K, T_limit, policies, s2, prior_type, color_dict = color_dict):
 
-    K_cond = df['K'] == K
+    K_cond = df['k'] == K
     dist_cond = df['reward_dist'] == reward_dist
+    batch_cond = df['batch'] == batch
     T_cond = df['T'] <= T_limit
 
     if reward_dist == "Bernoulli":
         s2 = 0.25
     
     s2_cond = df['s2'] == s2
-    prior_cond = df['prior_type'] == prior_type
+    prior_cond = df['prior'] == prior_type
     policy_cond = df['policy'].isin(policies)
 
-    plot_df = pd.DataFrame(df[K_cond & dist_cond & T_cond & policy_cond & s2_cond & prior_cond])
+    plot_df = pd.DataFrame(df[batch_cond & K_cond & dist_cond & T_cond & policy_cond & s2_cond & prior_cond])
     plot_df['avg_regret_unif'] = plot_df['avg_regret'] * (plot_df['policy'] == 'Uniform')
     plot_df['unif_regret'] = plot_df['avg_regret_unif'].groupby(plot_df['T']).transform('sum')
     plot_df['pct_of_unif_regret'] = 100 * plot_df['avg_regret']/plot_df['unif_regret']
@@ -84,15 +86,16 @@ def plot_line(df, metric, reward_dist, K, T_limit, policies, s2, prior_type, col
     st.pyplot(fig)
 
 @st.cache
-def filter_bar_s2(df, metric, K, T, policies, prior_type):
+def filter_bar_s2(df, metric, batch, K, T, policies, prior_type):
 
-    K_cond = df['K'] == K
+    K_cond = df['k'] == K
     T_cond = df['T'] == T
-    prior_cond = df['prior_type'] == prior_type
+    batch_cond = df['batch'] == batch
+    prior_cond = df['prior'] == prior_type
     policy_cond = df['policy'].isin(policies)
     reward_cond = df['reward_dist'] == "Gumbel"
 
-    plot_df = pd.DataFrame(df[K_cond & T_cond & reward_cond & policy_cond & prior_cond])
+    plot_df = pd.DataFrame(df[batch_cond & K_cond & T_cond & reward_cond & policy_cond & prior_cond])
     plot_df['avg_regret_unif'] = plot_df['avg_regret'] * (plot_df['policy'] == 'Uniform')
     plot_df['unif_regret'] = plot_df['avg_regret_unif'].groupby(plot_df['s2']).transform('sum')
     plot_df['pct_of_unif_regret'] = 100 * plot_df['avg_regret']/plot_df['unif_regret']
@@ -109,19 +112,20 @@ def filter_bar_s2(df, metric, K, T, policies, prior_type):
     return pivot
 
 @st.cache
-def filter_bar_prior(df, metric, reward_dist, K, T, policies, s2, color_dict = color_dict):
+def filter_bar_prior(df, metric, reward_dist, batch, K, T, policies, s2, color_dict = color_dict):
 
-    K_cond = df['K'] == K
+    K_cond = df['k'] == K
     T_cond = df['T'] == T
+    batch_cond = df['batch'] == batch
     dist_cond = df['reward_dist'] == reward_dist
     if reward_dist == "Bernoulli":
         s2 = 0.25
     s2_cond = df['s2'] == s2
     policy_cond = df['policy'].isin(policies)
 
-    plot_df = pd.DataFrame(df[dist_cond & K_cond & T_cond & policy_cond & s2_cond])
+    plot_df = pd.DataFrame(df[dist_cond & batch_cond & K_cond & T_cond & policy_cond & s2_cond])
     plot_df['avg_regret_unif'] = plot_df['avg_regret'] * (plot_df['policy'] == 'Uniform')
-    plot_df['unif_regret'] = plot_df['avg_regret_unif'].groupby(plot_df['prior_type']).transform('sum')
+    plot_df['unif_regret'] = plot_df['avg_regret_unif'].groupby(plot_df['prior']).transform('sum')
     plot_df['pct_of_unif_regret'] = 100 * plot_df['avg_regret']/plot_df['unif_regret']
     plot_df['avg_correct'] = 100 * plot_df['avg_correct']
     
@@ -133,7 +137,7 @@ def filter_bar_prior(df, metric, reward_dist, K, T, policies, s2, color_dict = c
         plot_metric = "avg_correct"
 
     fig, ax = plt.subplots()
-    pivot = plot_df.pivot('prior_type', 'policy', plot_metric)
+    pivot = plot_df.pivot('prior', 'policy', plot_metric)
     pivot = pivot.reindex(["Flat", "Top One", "Top Half", "Descending"])
 
     return pivot
@@ -218,7 +222,8 @@ with oracle:
 with freq:
     st.write("""
     Standard frequentist policies.
-    - **Uniform:** uniformly samples all arms in every batch.  
+    - **Uniform:** uniformly samples all arms in every batch. 
+    - **Epsilon Greedy:** assigns 50\\% of samples to the empirically best arm, divides the remaining samples uniformly across the remaining arms. 
     - **Batch Successive Elimination:** in every time period, arm is eliminated if its upper confidence bound is below the lower confidence bound of another arm. 
         - If an arm $a$ is sampled $n_{a}$ times, then its confidence bound is: $C_{a} = c \cdot s_{a}\sqrt{\\frac{\log(Kn_{a}^{2}/\delta))}{n_{a}}}$,
         - $s_{a}$ is measurement standard deviation, $K$ is the number of arms, $c$ and $\delta$ are chosen optimally for each instance via grid search.
@@ -332,6 +337,7 @@ with line_plt_toggle:
     dist_selected = st.radio("Reward Distribution", options = ('Gumbel', 'Bernoulli'), key = 'dist_select')
 
     K_selected = st.radio("Number of Treatment Arms", options = (10, 100), key = 'K_select')
+    batch_selected = st.radio("Batch Size", options = (100, 10000), key = 'batch_select')
     metric_selected = st.selectbox("Metric", options = ('Percent of Simple Regret of Uniform', 'Simple Regret', 'Percent Correct'), 
                                     key = 'metric_select')
     s2_selected = st.selectbox("Measurement variance", options = (1, 0.2, 5), key = 's2_select')
@@ -353,7 +359,8 @@ with line_plt:
     st.text("")
     plot_line(regret_df, 
               metric_selected, 
-              dist_selected, 
+              dist_selected,
+              batch_selected,
               K_selected, 
               T_selected[1], 
               policies_selected, 
@@ -379,7 +386,7 @@ with row3_2:
                                     key = 'bar_reward_select')
 
     bar_K_selected = st.radio("Number of Treatment Arms", options = (10, 100), key = 'bar_K_select')
-
+    bar_batch_selected = st.radio("Batch Size", options = (100, 10000), key = 'bar_batch_select')
     bar_metric_selected = st.selectbox("Metric", options = ('Percent of Simple Regret of Uniform', 'Simple Regret', 'Percent Correct'), 
                                     key = 'bar_metric_select')
     bar_policies_selected = st.multiselect("Policies", options = [key for key in  color_dict.keys()], key = 'bar_policies_select', 
@@ -399,6 +406,7 @@ with row3_1:
     st.text("")
     plot_bar(filter_bar_s2(regret_df, 
                             bar_metric_selected, 
+                            bar_batch_selected,
                             bar_K_selected, 
                             bar_T_selected[1], 
                             bar_policies_selected,
@@ -421,11 +429,12 @@ with row4_2:
     st.text("")
     prior_dist_selected = st.radio("Reward Distribution", options = ('Gumbel', 'Bernoulli'), key = 'prior_dist_select')
     prior_K_selected = st.radio("Number of Treatment Arms", options = (10, 100), key = 'prior_K_select')
+    prior_batch_selected = st.radio("Batch Size", options = (100, 10000), key = 'prior_batch_select')
     prior_metric_selected = st.selectbox("Metric", options = ('Percent of Simple Regret of Uniform', 'Simple Regret', 'Percent Correct'), 
                                     key = 'prior_metric_select')     
     prior_s2_selected = st.selectbox("Measurement variance", options = (1, 0.2, 5), key = 'prior_s2_select')
     prior_policies_selected = st.multiselect("Policies", options = [key for key in  color_dict.keys()], key = 'prior_policies_select', 
-                                        default = ['Uniform', 
+                                        default = ['Uniform',
                                                    'Successive Elimination', 
                                                    'Gaussian Limit TS', 
                                                    'Oracle TS',
@@ -439,6 +448,7 @@ with row4_1:
     plot_bar(filter_bar_prior(regret_df,
                 prior_metric_selected, 
                 prior_dist_selected,
+                prior_batch_selected,
                 prior_K_selected, 
                 prior_T_selected[1], 
                 prior_policies_selected,
