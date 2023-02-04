@@ -1,7 +1,0 @@
-# run: conda env create --file environment.yml
-name: aes
-dependencies:
-  - python=3.9
-  - numpy=1.22.*
-  - pandas=1.4.*
-  - matplotlib=3.4.0
